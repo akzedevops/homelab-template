@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crowdsec
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/manifest-generate-paths: .
+spec:
+  project: default
+  source:
+    repoURL: https://crowdsecurity.github.io/helm-charts
+    chart: crowdsec
+    targetRevision: "*"
+    helm:
+      values: |
+        container_runtime: containerd
+        agent:
+          acquisition:
+            - namespace: traefik
+              podName: traefik-*
+              program: traefik
+              poll_without_inotify: true
+          env:
+            - name: COLLECTIONS
+              value: "crowdsecurity/traefik crowdsecurity/http-cve crowdsecurity/linux"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+        lapi:
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: crowdsec
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+    syncOptions:
+      - CreateNamespace=true

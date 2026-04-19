@@ -1,0 +1,29 @@
+apiVersion: v1
+data:
+  loki.json: '{"title": "Loki Logs Overview", "tags": ["loki", "logs"], "timezone":
+    "browser", "refresh": "30s", "uid": "loki-custom", "panels": [{"title": "Log Lines
+    / sec", "type": "stat", "gridPos": {"h": 4, "w": 8, "x": 0, "y": 0}, "targets":
+    [{"expr": "sum(rate(log_entries_total[5m]))", "refId": "A"}], "datasource": {"uid":
+    "prometheus"}, "fieldConfig": {"defaults": {"unit": "/s", "color": {"mode": "fixed",
+    "fixedColor": "blue"}}}}, {"title": "Active Streams", "type": "stat", "gridPos":
+    {"h": 4, "w": 8, "x": 8, "y": 0}, "targets": [{"expr": "sum(loki_ingester_memory_streams)",
+    "refId": "A"}], "datasource": {"uid": "prometheus"}, "fieldConfig": {"defaults":
+    {"color": {"mode": "fixed", "fixedColor": "green"}}}}, {"title": "Ingestion Rate",
+    "type": "stat", "gridPos": {"h": 4, "w": 8, "x": 16, "y": 0}, "targets": [{"expr":
+    "sum(rate(loki_distributor_bytes_received_total[5m]))", "refId": "A"}], "datasource":
+    {"uid": "prometheus"}, "fieldConfig": {"defaults": {"unit": "Bps", "color": {"mode":
+    "fixed", "fixedColor": "purple"}}}}, {"title": "Log Volume by Namespace", "type":
+    "timeseries", "gridPos": {"h": 8, "w": 24, "x": 0, "y": 4}, "targets": [{"expr":
+    "sum by (namespace) (rate(log_entries_total[5m]))", "refId": "A", "legendFormat":
+    "{{namespace}}"}], "datasource": {"uid": "prometheus"}}, {"title": "Error Logs
+    (all namespaces)", "type": "logs", "gridPos": {"h": 8, "w": 24, "x": 0, "y": 12},
+    "targets": [{"expr": "{namespace=~\".+\"} |~ \"(?i)error|panic|fatal|exception\"",
+    "refId": "A"}], "datasource": {"uid": "P8E80F9AEF21F6940"}}, {"title": "All Logs",
+    "type": "logs", "gridPos": {"h": 8, "w": 24, "x": 0, "y": 20}, "targets": [{"expr":
+    "{namespace=~\".+\"}", "refId": "A"}], "datasource": {"uid": "P8E80F9AEF21F6940"}}]}'
+kind: ConfigMap
+metadata:
+  labels:
+    grafana_dashboard: "1"
+  name: grafana-dashboard-loki
+  namespace: monitoring

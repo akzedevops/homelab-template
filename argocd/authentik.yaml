@@ -1,0 +1,43 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: authentik
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/manifest-generate-paths: platform/authentik
+spec:
+  project: default
+  sources:
+  - repoURL: https://charts.goauthentik.io
+    chart: authentik
+    targetRevision: '*'
+    helm:
+      valueFiles:
+      - $values/platform/authentik/values.yaml
+  - repoURL: https://gitea.example.com/admin/homelab.git
+    targetRevision: main
+    ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: authentik
+  ignoreDifferences:
+  - group: ''
+    kind: Secret
+    name: authentik-postgresql
+    jsonPointers:
+    - /data
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+    syncOptions:
+    - CreateNamespace=true
+    - RespectIgnoreDifferences=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m

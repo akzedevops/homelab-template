@@ -1,0 +1,24 @@
+nextcloud:
+  host: nextcloud.example.com
+  configs:
+    custom.config.php: |-
+      <?php
+      $CONFIG = array(
+        'trusted_domains' => array(
+          0 => 'nextcloud.example.com',
+        ),
+        'overwriteprotocol' => 'https',
+        'overwrite.cli.url' => 'https://nextcloud.example.com',
+      );
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 512Mi
+persistence:
+  enabled: true
+  size: 20Gi
+internalDatabase:
+  enabled: true

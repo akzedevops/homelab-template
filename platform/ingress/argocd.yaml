@@ -1,0 +1,20 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: argocd
+  annotations:
+    external-dns.alpha.kubernetes.io/target: "<TUNNEL-UUID>.cfargotunnel.com"
+  namespace: argocd
+spec:
+  entryPoints: [websecure]
+  tls:
+
+  routes:
+    - match: Host(`argocd.example.com`)
+      kind: Rule
+      middlewares:
+        - name: crowdsec-bouncer
+          namespace: traefik
+      services:
+        - name: argocd-server
+          port: 80

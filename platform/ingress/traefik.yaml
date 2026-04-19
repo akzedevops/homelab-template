@@ -1,0 +1,39 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: oidc-auth
+  namespace: traefik
+spec:
+  plugin:
+    traefik-oidc-auth:
+      Secret: "urn:k8s:secret:traefik-oidc-secret:pluginSecret"
+      Provider:
+        Url: https://auth.example.com/application/o/traefik/
+        ClientId: LtZwZKX46HOqLBNtgu2TDwNhwqTWLKGyDmVa6UzR
+        ClientSecret: "urn:k8s:secret:traefik-oidc-secret:clientSecret"
+      Scopes:
+        - openid
+        - profile
+        - email
+      CallbackUri: /oidc/callback
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik-dashboard
+  namespace: traefik
+  annotations:
+    external-dns.alpha.kubernetes.io/target: "<TUNNEL-UUID>.cfargotunnel.com"
+spec:
+  entryPoints: [websecure]
+  tls:
+    secretName: example-com-tls
+  routes:
+    - match: Host(`traefik.example.com`)
+      kind: Rule
+      middlewares:
+        - name: oidc-auth
+          namespace: traefik
+      services:
+        - name: api@internal
+          kind: TraefikService

@@ -1,0 +1,29 @@
+name: Build Docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs-site/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: python:3.12-slim
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and upload
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.SPACES_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.SPACES_SECRET_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+        working-directory: docs-site
+        run: |
+          pip install --quiet mkdocs-material
+          mkdocs build
+          tar -czf /tmp/docs-site.tar.gz -C site .
+          pip install --quiet awscli
+          aws s3 cp /tmp/docs-site.tar.gz s3://your-spaces-bucket/docs/docs-site.tar.gz \
+            --endpoint-url https://nyc3.digitaloceanspaces.com \
+            --acl public-read

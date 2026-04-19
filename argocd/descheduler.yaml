@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: descheduler
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://kubernetes-sigs.github.io/descheduler
+    chart: descheduler
+    targetRevision: "*"
+    helm:
+      values: |
+        schedule: "*/5 * * * *"
+        deschedulerPolicy:
+          strategies:
+            RemoveDuplicates:
+              enabled: true
+            LowNodeUtilization:
+              enabled: true
+              params:
+                nodeResourceUtilizationThresholds:
+                  thresholds:
+                    cpu: 20
+                    memory: 20
+                  targetThresholds:
+                    cpu: 50
+                    memory: 50
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

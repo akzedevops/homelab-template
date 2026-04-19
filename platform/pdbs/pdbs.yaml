@@ -1,0 +1,155 @@
+# Traefik - zero downtime (2 replicas)
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: traefik
+  namespace: traefik
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: traefik
+---
+# ArgoCD Server
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: argocd-server
+  namespace: argocd
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: argocd-server
+---
+# ArgoCD Controller
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: argocd-controller
+  namespace: argocd
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: argocd-application-controller
+---
+# ArgoCD Repo Server
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: argocd-repo-server
+  namespace: argocd
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: argocd-repo-server
+---
+# Grafana
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: grafana
+  namespace: monitoring
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: grafana
+---
+# Prometheus
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: prometheus
+  namespace: monitoring
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus
+---
+# Alertmanager
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: alertmanager
+  namespace: monitoring
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: alertmanager
+---
+# Loki
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: loki
+  namespace: monitoring
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: loki
+---
+# Gitea
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: gitea
+  namespace: gitea
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gitea
+---
+# Nextcloud
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: nextcloud
+  namespace: nextcloud
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nextcloud
+---
+# Jellyfin
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: jellyfin
+  namespace: jellyfin
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: jellyfin
+---
+# Gitea Runner
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: gitea-runner
+  namespace: gitea
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: actions
+---
+# Vaultwarden
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: vaultwarden
+  namespace: vaultwarden
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vaultwarden

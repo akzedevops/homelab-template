@@ -1,0 +1,96 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: db-backup
+  namespace: kube-system
+spec:
+  schedule: "0 4 * * 0"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 86400
+      template:
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: db-backup
+          containers:
+            - name: backup
+              image: bitnami/kubectl:latest
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -e
+                  DATE=$(date +%Y%m%d-%H%M%S)
+                  echo "=== Starting backup $DATE ==="
+
+                  # Dump Gitea DB via exec
+                  kubectl exec -n gitea gitea-postgresql-0 -- \
+                    bash -c 'PGPASSWORD=$(cat /opt/bitnami/postgresql/secrets/password) pg_dump -U gitea -d gitea' \
+                    | gzip > /tmp/gitea-${DATE}.sql.gz
+                  echo "Gitea: $(wc -c < /tmp/gitea-${DATE}.sql.gz) bytes"
+
+                  # Dump Authentik DB via exec
+                  kubectl exec -n authentik authentik-postgresql-0 -- \
+                    bash -c 'PGPASSWORD=$(cat /opt/bitnami/postgresql/secrets/password) pg_dump -U authentik -d authentik' \
+                    | gzip > /tmp/authentik-${DATE}.sql.gz
+                  echo "Authentik: $(wc -c < /tmp/authentik-${DATE}.sql.gz) bytes"
+
+                  # Upload to Spaces
+                  for f in /tmp/*.sql.gz; do
+                    FILENAME=$(basename $f)
+                    RESOURCE="/your-spaces-bucket/backups/db/${FILENAME}"
+                    DATE_HEADER=$(date -R)
+                    CONTENT_TYPE="application/gzip"
+                    STRING_TO_SIGN="PUT\n\n${CONTENT_TYPE}\n${DATE_HEADER}\n${RESOURCE}"
+                    SIGNATURE=$(echo -en "${STRING_TO_SIGN}" | openssl sha1 -hmac "${AWS_SECRET_ACCESS_KEY}" -binary | base64)
+
+                    curl -sf -X PUT \
+                      -H "Date: ${DATE_HEADER}" \
+                      -H "Content-Type: ${CONTENT_TYPE}" \
+                      -H "Authorization: AWS ${AWS_ACCESS_KEY_ID}:${SIGNATURE}" \
+                      --data-binary @${f} \
+                      "https://nyc3.digitaloceanspaces.com/your-spaces-bucket/backups/db/${FILENAME}"
+                    echo "Uploaded: ${FILENAME}"
+                  done
+
+                  echo "=== Backup complete ==="
+              envFrom:
+                - secretRef:
+                    name: backup-s3-credentials
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 128Mi
+                limits:
+                  cpu: 500m
+                  memory: 256Mi
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: db-backup
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: db-backup
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/exec"]
+    verbs: ["get", "list", "create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: db-backup
+subjects:
+  - kind: ServiceAccount
+    name: db-backup
+    namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: db-backup
+  apiGroup: rbac.authorization.k8s.io

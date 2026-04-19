@@ -1,0 +1,20 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: goldilocks
+  namespace: goldilocks
+  annotations:
+    external-dns.alpha.kubernetes.io/target: "<TUNNEL-UUID>.cfargotunnel.com"
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`goldilocks.example.com`)
+      middlewares:
+        - name: crowdsec-bouncer
+          namespace: traefik
+      services:
+        - name: goldilocks-dashboard
+          port: 80
+  tls: {}

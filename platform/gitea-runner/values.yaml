@@ -1,0 +1,33 @@
+enabled: true
+existingSecret: gitea-runner-token
+existingSecretKey: token
+giteaRootURL: http://gitea-http.gitea.svc.cluster.local:3000
+
+statefulset:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  actRunner:
+    config: |
+      log:
+        level: info
+      runner:
+        labels:
+          - "ubuntu-latest:docker://node:20-bookworm-slim"
+      container:
+        network: bridge
+        privileged: false
+        options: --memory=512m
+  dind:
+    resources:
+      requests:
+        cpu: 200m
+        memory: 1Gi
+      limits:
+        cpu: "2"
+        memory: 2Gi

@@ -1,0 +1,42 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: hubble-oidc
+  namespace: kube-system
+spec:
+  plugin:
+    traefik-oidc-auth:
+      Secret: "urn:k8s:secret:hubble-oidc-secret:pluginSecret"
+      Provider:
+        Url: https://auth.example.com/application/o/hubble/
+        ClientId: JtVaasqw36L7LKpV9NLlZIagyysvNxsN9I7xE4kl
+        ClientSecret: "urn:k8s:secret:hubble-oidc-secret:clientSecret"
+      Scopes:
+        - openid
+        - profile
+        - email
+      CallbackUri: /oidc/callback
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: hubble-ui
+  namespace: kube-system
+  annotations:
+    external-dns.alpha.kubernetes.io/target: "<TUNNEL-UUID>.cfargotunnel.com"
+spec:
+  entryPoints: [websecure]
+  tls: {}
+  routes:
+    - match: Host(`hubble.example.com`)
+      kind: Rule
+      middlewares:
+        - name: hubble-oidc
+          namespace: kube-system
+      middlewares:
+        - name: crowdsec-bouncer
+          namespace: traefik
+      services:
+        - name: hubble-ui
+          namespace: kube-system
+          port: 80

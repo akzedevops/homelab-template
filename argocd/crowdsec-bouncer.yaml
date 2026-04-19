@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crowdsec-bouncer
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://crowdsecurity.github.io/helm-charts
+    chart: crowdsec-traefik-bouncer
+    targetRevision: "*"
+    helm:
+      values: |
+        bouncer:
+          crowdsec_bouncer_api_key: "<BOUNCER-API-KEY>"
+          crowdsec_agent_host: "crowdsec-service.crowdsec.svc:8080"
+        resources:
+          requests:
+            cpu: 25m
+            memory: 32Mi
+          limits:
+            cpu: 100m
+            memory: 64Mi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: crowdsec
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true

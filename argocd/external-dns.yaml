@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: external-dns
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/manifest-generate-paths: platform/external-dns
+spec:
+  project: default
+  sources:
+  - repoURL: https://kubernetes-sigs.github.io/external-dns/
+    chart: external-dns
+    targetRevision: '*'
+    helm:
+      valueFiles:
+      - $values/platform/external-dns/values.yaml
+  - repoURL: https://gitea.example.com/admin/homelab.git
+    targetRevision: main
+    ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: external-dns
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+    syncOptions:
+    - CreateNamespace=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 2m

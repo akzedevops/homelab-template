@@ -1,0 +1,31 @@
+apiVersion: v1
+data:
+  certmanager.json: '{"title": "Cert Manager", "tags": ["cert-manager"], "timezone":
+    "browser", "refresh": "1m", "uid": "certmanager-custom", "panels": [{"title":
+    "Certificates Ready", "type": "stat", "gridPos": {"h": 4, "w": 8, "x": 0, "y":
+    0}, "targets": [{"expr": "count(certmanager_certificate_ready_status{condition=\"True\"})",
+    "refId": "A"}], "datasource": {"uid": "prometheus"}, "fieldConfig": {"defaults":
+    {"color": {"mode": "fixed", "fixedColor": "green"}}}}, {"title": "Certificates
+    Not Ready", "type": "stat", "gridPos": {"h": 4, "w": 8, "x": 8, "y": 0}, "targets":
+    [{"expr": "count(certmanager_certificate_ready_status{condition=\"False\"})",
+    "refId": "A"}], "datasource": {"uid": "prometheus"}, "fieldConfig": {"defaults":
+    {"color": {"mode": "fixed", "fixedColor": "red"}, "thresholds": {"steps": [{"value":
+    0, "color": "green"}, {"value": 1, "color": "red"}]}}}}, {"title": "Days Until
+    Expiry", "type": "stat", "gridPos": {"h": 4, "w": 8, "x": 16, "y": 0}, "targets":
+    [{"expr": "min((certmanager_certificate_expiration_timestamp_seconds - time())
+    / 86400)", "refId": "A"}], "datasource": {"uid": "prometheus"}, "fieldConfig":
+    {"defaults": {"unit": "d", "decimals": 0, "thresholds": {"steps": [{"value": 0,
+    "color": "red"}, {"value": 14, "color": "yellow"}, {"value": 30, "color": "green"}]}}}},
+    {"title": "Certificate Expiry Timeline", "type": "timeseries", "gridPos": {"h":
+    8, "w": 24, "x": 0, "y": 4}, "targets": [{"expr": "(certmanager_certificate_expiration_timestamp_seconds
+    - time()) / 86400", "refId": "A", "legendFormat": "{{name}}"}], "datasource":
+    {"uid": "prometheus"}, "fieldConfig": {"defaults": {"unit": "d"}}}, {"title":
+    "Cert Manager Logs", "type": "logs", "gridPos": {"h": 8, "w": 24, "x": 0, "y":
+    12}, "targets": [{"expr": "{namespace=\"cert-manager\"}", "refId": "A"}], "datasource":
+    {"uid": "P8E80F9AEF21F6940"}}]}'
+kind: ConfigMap
+metadata:
+  labels:
+    grafana_dashboard: "1"
+  name: grafana-dashboard-certmanager
+  namespace: monitoring

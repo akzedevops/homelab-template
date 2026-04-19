@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: paperless
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/manifest-generate-paths: apps/paperless
+spec:
+  project: default
+  source:
+    repoURL: https://gitea.example.com/admin/homelab.git
+    targetRevision: main
+    path: apps/paperless
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: paperless
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+    syncOptions:
+      - CreateNamespace=true

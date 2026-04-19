@@ -1,0 +1,131 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: paperless-data
+  namespace: paperless
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: do-block-storage
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: paperless-media
+  namespace: paperless
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: do-block-storage
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paperless-redis
+  namespace: paperless
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: paperless-redis
+  template:
+    metadata:
+      labels:
+        app: paperless-redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          ports:
+            - containerPort: 6379
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: paperless-redis
+  namespace: paperless
+spec:
+  selector:
+    app: paperless-redis
+  ports:
+    - port: 6379
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paperless
+  namespace: paperless
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    matchLabels:
+      app: paperless
+  template:
+    metadata:
+      labels:
+        app: paperless
+    spec:
+      containers:
+        - name: paperless
+          image: ghcr.io/paperless-ngx/paperless-ngx:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: PAPERLESS_URL
+              value: "https://paperless.example.com"
+            - name: PAPERLESS_REDIS
+              value: "redis://paperless-redis:6379"
+            - name: PAPERLESS_OCR_LANGUAGE
+              value: "eng"
+            - name: PAPERLESS_TIME_ZONE
+              value: "Asia/Yangon"
+            - name: PAPERLESS_ADMIN_USER
+              value: "admin"
+            - name: PAPERLESS_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-admin-secret
+                  key: PAPERLESS_ADMIN_PASSWORD
+          volumeMounts:
+            - name: data
+              mountPath: /usr/src/paperless/data
+            - name: media
+              mountPath: /usr/src/paperless/media
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: paperless-data
+        - name: media
+          persistentVolumeClaim:
+            claimName: paperless-media
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: paperless-web
+  namespace: paperless
+spec:
+  selector:
+    app: paperless
+  ports:
+    - port: 8000

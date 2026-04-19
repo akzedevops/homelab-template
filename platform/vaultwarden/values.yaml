@@ -1,0 +1,16 @@
+domain: "https://vault.example.com"
+signupsAllowed: false
+adminToken:
+  value: "$argon2id$v=19$m=65536,t=3,p=4$Y2FPbHpxdGdWbm4xVlJqQ0s0YTJuZz09$YzPDlAZrOCYnQ7E4H8JxIc1YVO4DXsEuInz3YcdeiJI"
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi
+data:
+  size: 1Gi
+  storageClass: do-block-storage
+image:
+  tag: "1.35.7-alpine"

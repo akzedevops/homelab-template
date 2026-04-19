@@ -1,0 +1,303 @@
+apiVersion: v1
+data:
+  traefik-ingress.json: |
+    {
+      "panels": [
+        {
+          "datasource": {
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "blue",
+                "mode": "fixed"
+              },
+              "unit": "reqps"
+            }
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 0,
+            "y": 0
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(traefik_entrypoint_requests_total[5m]))",
+              "refId": "A"
+            }
+          ],
+          "title": "Req/s",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "green",
+                "mode": "fixed"
+              }
+            }
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 4,
+            "y": 0
+          },
+          "targets": [
+            {
+              "expr": "sum(traefik_open_connections)",
+              "refId": "A"
+            }
+          ],
+          "title": "Connections",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "yellow",
+                "mode": "fixed"
+              },
+              "unit": "reqps"
+            }
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 8,
+            "y": 0
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(traefik_entrypoint_requests_total{code=~\"4..\"}[5m]))",
+              "refId": "A"
+            }
+          ],
+          "title": "4xx/s",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "red",
+                "mode": "fixed"
+              },
+              "unit": "reqps"
+            }
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 12,
+            "y": 0
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(traefik_entrypoint_requests_total{code=~\"5..\"}[5m]))",
+              "refId": "A"
+            }
+          ],
+          "title": "5xx/s",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "purple",
+                "mode": "fixed"
+              },
+              "decimals": 3,
+              "unit": "s"
+            }
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 16,
+            "y": 0
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(traefik_entrypoint_request_duration_seconds_sum[5m]))/sum(rate(traefik_entrypoint_request_duration_seconds_count[5m]))",
+              "refId": "A"
+            }
+          ],
+          "title": "Avg Latency",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "green",
+                "mode": "fixed"
+              },
+              "decimals": 0,
+              "unit": "percent"
+            }
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 20,
+            "y": 0
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(traefik_entrypoint_requests_tls_total[5m]))/sum(rate(traefik_entrypoint_requests_total[5m]))*100",
+              "refId": "A"
+            }
+          ],
+          "title": "TLS %",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 4
+          },
+          "targets": [
+            {
+              "expr": "sum by (service) (rate(traefik_service_requests_total[5m]))",
+              "legendFormat": "{{service}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Requests by Service",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 4
+          },
+          "targets": [
+            {
+              "expr": "sum by (code) (rate(traefik_entrypoint_requests_total[5m]))",
+              "legendFormat": "{{code}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Response Codes",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s"
+            }
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 12
+          },
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.95,sum by (service,le) (rate(traefik_service_request_duration_seconds_bucket[5m])))",
+              "legendFormat": "{{service}}",
+              "refId": "A"
+            }
+          ],
+          "title": "P95 Latency by Service",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "Bps"
+            }
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 12
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(traefik_entrypoint_requests_bytes_total[5m]))",
+              "legendFormat": "In",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(rate(traefik_entrypoint_responses_bytes_total[5m]))",
+              "legendFormat": "Out",
+              "refId": "B"
+            }
+          ],
+          "title": "Bandwidth",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "uid": "P8E80F9AEF21F6940"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 20
+          },
+          "targets": [
+            {
+              "expr": "{namespace=\"traefik\"} | json | __error__=\"\"",
+              "refId": "A"
+            }
+          ],
+          "title": "Access Logs",
+          "type": "logs"
+        }
+      ],
+      "refresh": "30s",
+      "tags": [
+        "traefik"
+      ],
+      "timezone": "browser",
+      "title": "Traefik Ingress",
+      "uid": "b958c08b-e2b0-4e18-b1ef-3196998a09cb"
+    }
+kind: ConfigMap
+metadata:
+  labels:
+    grafana_dashboard: "1"
+  name: grafana-dashboard-traefik-ingress
+  namespace: monitoring

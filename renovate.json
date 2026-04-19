@@ -1,0 +1,19 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "enabledManagers": ["argocd", "helm-values", "dockerfile", "kubernetes"],
+  "packageRules": [
+    {
+      "matchManagers": ["argocd"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "automergeType": "pr"
+    },
+    {
+      "matchManagers": ["argocd"],
+      "matchUpdateTypes": ["major"],
+      "automerge": false
+    }
+  ],
+  "schedule": ["every weekend"]
+}

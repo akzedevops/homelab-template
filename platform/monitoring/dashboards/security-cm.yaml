@@ -1,0 +1,66 @@
+apiVersion: v1
+data:
+  security.json: "{\n  \"panels\": [\n    {\n      \"datasource\": {\n        \"uid\":
+    \"prometheus\"\n      },\n      \"fieldConfig\": {\n        \"defaults\": {\n
+    \         \"color\": {\n            \"fixedColor\": \"red\",\n            \"mode\":
+    \"fixed\"\n          }\n        }\n      },\n      \"gridPos\": {\n        \"h\":
+    4,\n        \"w\": 6,\n        \"x\": 0,\n        \"y\": 0\n      },\n      \"targets\":
+    [\n        {\n          \"expr\": \"sum(falcosecurity_falcosidekick_falco_events_total{priority_raw=\\\"critical\\\"})\",\n
+    \         \"refId\": \"A\"\n        }\n      ],\n      \"title\": \"\U0001F534
+    Critical Events\",\n      \"type\": \"stat\"\n    },\n    {\n      \"datasource\":
+    {\n        \"uid\": \"prometheus\"\n      },\n      \"fieldConfig\": {\n        \"defaults\":
+    {\n          \"color\": {\n            \"fixedColor\": \"orange\",\n            \"mode\":
+    \"fixed\"\n          }\n        }\n      },\n      \"gridPos\": {\n        \"h\":
+    4,\n        \"w\": 6,\n        \"x\": 6,\n        \"y\": 0\n      },\n      \"targets\":
+    [\n        {\n          \"expr\": \"sum(cs_active_decisions)\",\n          \"refId\":
+    \"A\"\n        }\n      ],\n      \"title\": \"\U0001F6E1️ Active Bans\",\n      \"type\":
+    \"stat\"\n    },\n    {\n      \"datasource\": {\n        \"uid\": \"prometheus\"\n
+    \     },\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"color\":
+    {\n            \"fixedColor\": \"yellow\",\n            \"mode\": \"fixed\"\n
+    \         }\n        }\n      },\n      \"gridPos\": {\n        \"h\": 4,\n        \"w\":
+    6,\n        \"x\": 12,\n        \"y\": 0\n      },\n      \"targets\": [\n        {\n
+    \         \"expr\": \"sum(falcosecurity_falcosidekick_falco_events_total{priority_raw=\\\"warning\\\"})\",\n
+    \         \"refId\": \"A\"\n        }\n      ],\n      \"title\": \"⚠️ Warnings\",\n
+    \     \"type\": \"stat\"\n    },\n    {\n      \"datasource\": {\n        \"uid\":
+    \"prometheus\"\n      },\n      \"fieldConfig\": {\n        \"defaults\": {\n
+    \         \"color\": {\n            \"fixedColor\": \"blue\",\n            \"mode\":
+    \"fixed\"\n          }\n        }\n      },\n      \"gridPos\": {\n        \"h\":
+    4,\n        \"w\": 6,\n        \"x\": 18,\n        \"y\": 0\n      },\n      \"targets\":
+    [\n        {\n          \"expr\": \"sum(falcosecurity_falcosidekick_inputs_total{status=\\\"accepted\\\"})\",\n
+    \         \"refId\": \"A\"\n        }\n      ],\n      \"title\": \"\U0001F4CA
+    Total Events\",\n      \"type\": \"stat\"\n    },\n    {\n      \"datasource\":
+    {\n        \"uid\": \"prometheus\"\n      },\n      \"gridPos\": {\n        \"h\":
+    8,\n        \"w\": 12,\n        \"x\": 0,\n        \"y\": 4\n      },\n      \"targets\":
+    [\n        {\n          \"expr\": \"sort_desc(sum by (rule, priority_raw) (falcosecurity_falcosidekick_falco_events_total))\",\n
+    \         \"format\": \"table\",\n          \"instant\": true,\n          \"refId\":
+    \"A\"\n        }\n      ],\n      \"title\": \"Falco Events by Rule\",\n      \"type\":
+    \"table\"\n    },\n    {\n      \"datasource\": {\n        \"uid\": \"prometheus\"\n
+    \     },\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 12,\n        \"x\":
+    12,\n        \"y\": 4\n      },\n      \"targets\": [\n        {\n          \"expr\":
+    \"cs_active_decisions\",\n          \"format\": \"table\",\n          \"instant\":
+    true,\n          \"refId\": \"A\"\n        }\n      ],\n      \"title\": \"CrowdSec
+    Decisions\",\n      \"type\": \"table\"\n    },\n    {\n      \"datasource\":
+    {\n        \"uid\": \"prometheus\"\n      },\n      \"gridPos\": {\n        \"h\":
+    8,\n        \"w\": 12,\n        \"x\": 0,\n        \"y\": 12\n      },\n      \"targets\":
+    [\n        {\n          \"expr\": \"sum by (rule) (rate(falcosecurity_falcosidekick_falco_events_total[5m]))\",\n
+    \         \"legendFormat\": \"{{rule}}\",\n          \"refId\": \"A\"\n        }\n
+    \     ],\n      \"title\": \"Falco Event Rate\",\n      \"type\": \"timeseries\"\n
+    \   },\n    {\n      \"datasource\": {\n        \"uid\": \"prometheus\"\n      },\n
+    \     \"gridPos\": {\n        \"h\": 8,\n        \"w\": 12,\n        \"x\": 12,\n
+    \       \"y\": 12\n      },\n      \"targets\": [\n        {\n          \"expr\":
+    \"sum by (reason) (cs_active_decisions)\",\n          \"legendFormat\": \"{{reason}}\",\n
+    \         \"refId\": \"A\"\n        }\n      ],\n      \"title\": \"CrowdSec Decisions
+    Over Time\",\n      \"type\": \"timeseries\"\n    },\n    {\n      \"datasource\":
+    {\n        \"uid\": \"P8E80F9AEF21F6940\"\n      },\n      \"gridPos\": {\n        \"h\":
+    10,\n        \"w\": 24,\n        \"x\": 0,\n        \"y\": 20\n      },\n      \"targets\":
+    [\n        {\n          \"expr\": \"{namespace=\\\"falco\\\",container=\\\"falco\\\"}
+    | json | __error__=\\\"\\\"\",\n          \"refId\": \"A\"\n        }\n      ],\n
+    \     \"title\": \"Falco Logs\",\n      \"type\": \"logs\"\n    }\n  ],\n  \"refresh\":
+    \"30s\",\n  \"tags\": [\n    \"security\"\n  ],\n  \"timezone\": \"browser\",\n
+    \ \"title\": \"Security - Falco & CrowdSec\",\n  \"uid\": \"7d84bc45-19a2-42cf-b62a-2efd9d8f0f83\"\n}\n"
+kind: ConfigMap
+metadata:
+  labels:
+    grafana_dashboard: "1"
+  name: grafana-dashboard-security
+  namespace: monitoring

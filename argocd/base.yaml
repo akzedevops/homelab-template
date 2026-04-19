@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: base
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/manifest-generate-paths: platform/cert-manager
+spec:
+  project: default
+  source:
+    repoURL: https://gitea.example.com/admin/homelab.git
+    path: platform/cert-manager
+    targetRevision: main
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cert-manager
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+    retry:
+      limit: 3
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 2m

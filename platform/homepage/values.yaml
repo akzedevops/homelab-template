@@ -1,0 +1,165 @@
+enableRbac: true
+serviceAccount:
+  create: true
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi
+env:
+  HOMEPAGE_ALLOWED_HOSTS: home.example.com
+config:
+  bookmarks:
+  - Dev:
+    - GitHub:
+      - icon: si-github
+        href: https://github.com
+    - Docker Hub:
+      - icon: si-docker
+        href: https://hub.docker.com
+    - Helm Charts:
+      - icon: si-helm
+        href: https://artifacthub.io
+  - Cloud:
+    - DigitalOcean:
+      - icon: si-digitalocean
+        href: https://cloud.digitalocean.com
+    - Cloudflare:
+      - icon: si-cloudflare
+        href: https://dash.cloudflare.com
+    - Authentik:
+      - icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/authentik.png
+        href: https://auth.example.com
+  settings:
+    title: Homelab
+    theme: dark
+    color: slate
+    headerStyle: clean
+    iconStyle: theme
+    statusStyle: dot
+    hideVersion: true
+    disableCollapse: false
+    cardBlur: md
+    background:
+      image: https://images.unsplash.com/photo-1544256718-3bcf237f3974?w=1920
+      blur: sm
+      opacity: 20
+    layout:
+    - Infrastructure:
+        style: row
+        columns: 4
+    - Apps:
+        style: row
+        columns: 4
+    - Monitoring:
+        style: row
+        columns: 3
+  widgets:
+  - greeting:
+      text_size: xl
+      text: Homelab
+  - search:
+      provider: google
+      target: _blank
+  - openmeteo:
+      label: Yangon
+      latitude: 16.8661
+      longitude: 96.1951
+      timezone: Asia/Yangon
+      units: metric
+      cache: 5
+  - kubernetes:
+      cluster:
+        show: true
+        cpu: true
+        memory: true
+        showLabel: true
+        label: homelab
+      nodes:
+        show: true
+        cpu: true
+        memory: true
+        showLabel: true
+  - datetime:
+      text_size: l
+      format:
+        dateStyle: long
+        timeStyle: short
+        hour12: false
+  services:
+  - Infrastructure:
+    - ArgoCD:
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/argo-cd.png
+        href: https://argocd.example.com
+        description: GitOps CD
+        siteMonitor: https://argocd.example.com
+        widget:
+          type: argocd
+          url: http://argocd-server.argocd.svc
+          key: '{{HOMEPAGE_VAR_ARGOCD_KEY}}'
+    - Traefik:
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/traefik.png
+        href: https://traefik.example.com/dashboard/
+        description: Ingress Controller
+        siteMonitor: https://traefik.example.com
+        widget:
+          type: traefik
+          url: http://traefik.traefik.svc:8080
+    - Gitea:
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/gitea.png
+        href: https://gitea.example.com
+        description: Git Server
+        siteMonitor: https://gitea.example.com
+    - Authentik:
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/authentik.png
+        href: https://auth.example.com
+        description: Identity & SSO
+        siteMonitor: https://auth.example.com
+  - Apps:
+    - Nextcloud:
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/nextcloud.png
+        href: https://nextcloud.example.com
+        description: File Storage
+        siteMonitor: https://nextcloud.example.com
+    - Jellyfin:
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/jellyfin.png
+        href: https://jellyfin.example.com
+        description: Media Server
+        siteMonitor: https://jellyfin.example.com
+    - Vaultwarden:
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/vaultwarden.png
+        href: https://vault.example.com
+        description: Password Manager
+        siteMonitor: https://vault.example.com
+    - n8n:
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/n8n.png
+        href: https://n8n.example.com
+        description: Workflow Automation
+        siteMonitor: https://n8n.example.com
+  - Monitoring:
+    - Grafana:
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/grafana.png
+        href: https://grafana.example.com
+        description: Dashboards & Metrics
+        siteMonitor: https://grafana.example.com
+        widget:
+          type: grafana
+          url: http://monitoring-grafana.monitoring.svc
+          username: admin
+          password: '{{HOMEPAGE_VAR_GRAFANA_PASS}}'
+    - Hubble:
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/cilium.png
+        href: https://hubble.example.com
+        description: Network Observability
+        siteMonitor: https://hubble.example.com
+    - Prometheus:
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/prometheus.png
+        href: https://grafana.example.com/explore
+        description: Metrics Store
+  kubernetes:
+    mode: cluster
+envFrom:
+- secretRef:
+    name: homepage-api-keys

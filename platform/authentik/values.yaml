@@ -1,0 +1,63 @@
+authentik:
+  secret_key: ""
+  postgresql:
+    password: "authentik-db-pass"
+global:
+  env:
+    - name: AUTHENTIK_SECRET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: authentik-secret
+          key: secret-key
+    - name: AUTHENTIK_BOOTSTRAP_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: authentik-secret
+          key: bootstrap-password
+    - name: AUTHENTIK_BOOTSTRAP_EMAIL
+      valueFrom:
+        secretKeyRef:
+          name: authentik-secret
+          key: bootstrap-email
+server:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+worker:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+postgresql:
+  enabled: true
+  auth:
+    password: "authentik-db-pass"
+  primary:
+    persistence:
+      storageClass: do-block-storage
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+redis:
+  enabled: true
+  master:
+    persistence:
+      storageClass: do-block-storage
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi

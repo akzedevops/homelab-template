@@ -1,0 +1,18 @@
+existingEncryptionKeySecret: n8n-secrets
+timezone: Asia/Yangon
+webhook:
+  url: https://n8n.example.com/
+main:
+  persistence:
+    enabled: true
+    storageClass: do-block-storage
+    size: 5Gi
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: '1'
+    memory: 512Mi
+strategy:
+  type: Recreate

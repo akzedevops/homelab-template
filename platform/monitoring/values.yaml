@@ -1,0 +1,195 @@
+grafana:
+  admin:
+    existingSecret: monitoring-grafana
+    userKey: admin-user
+    passwordKey: admin-password
+  service:
+    type: ClusterIP
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: '1'
+      memory: 512Mi
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+  grafana.ini:
+    server:
+      root_url: https://grafana.example.com
+    auth.generic_oauth:
+      enabled: true
+      name: Authentik
+      allow_sign_up: true
+      auto_login: false
+      client_id: jxKRqAG7iIDUfWs1neG8Uw9aSKMc5qHaNdwrFXMm
+      scopes: openid profile email
+      auth_url: https://auth.example.com/application/o/authorize/
+      token_url: https://auth.example.com/application/o/token/
+      role_attribute_path: contains(groups[*], 'authentik Admins') && 'Admin' || 'Viewer'
+      email_attribute_path: email
+      client_secret: $__env{GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET}
+      login_attribute_path: preferred_username
+      name_attribute_path: name
+      use_pkce: true
+      use_refresh_token: true
+      api_url: https://auth.example.com/application/o/userinfo/
+    unified_storage:
+      enabled: false
+    feature_toggles:
+      enable: ''
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - name: default
+        folder: ''
+        type: file
+        options:
+          path: /var/lib/grafana/dashboards/default
+  dashboards:
+    default:
+      node-exporter:
+        gnetId: 1860
+        revision: 37
+        datasource: Prometheus
+      traefik:
+        gnetId: 17346
+        revision: 9
+        datasource: Prometheus
+  envFromSecrets:
+  - name: grafana-oauth-secret
+    optional: false
+  assertNoLeakedSecrets: false
+  image:
+    tag: 13.0.1
+  defaultDashboardsTimezone: browser
+alertmanager:
+  alertmanagerSpec:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
+  config:
+    global:
+      resolve_timeout: 5m
+    route:
+      receiver: telegram
+      group_by: ['alertname', 'namespace']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 4h
+      routes:
+        - receiver: telegram
+          matchers:
+            - severity=~"critical|warning"
+    receivers:
+      - name: telegram
+        telegram_configs:
+          - bot_token: "<TELEGRAM-BOT-TOKEN>"
+            chat_id: <TELEGRAM-CHAT-ID>
+            parse_mode: HTML
+            message: |
+              {{ range .Alerts }}
+              {{ if eq .Status "firing" }}🔴{{ else }}🟢{{ end }} <b>{{ .Labels.alertname }}</b>
+              <b>Severity:</b> {{ .Labels.severity }}
+              <b>Namespace:</b> {{ .Labels.namespace }}
+              {{ .Annotations.description }}
+              {{ end }}
+additionalPrometheusRulesMap:
+  homelab-alerts:
+    groups:
+      - name: homelab
+        rules:
+          - alert: PodCrashLooping
+            expr: rate(kube_pod_container_status_restarts_total[15m]) * 60 * 5 > 0
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              description: "Pod {{ $labels.namespace }}/{{ $labels.pod }} is crash looping"
+          - alert: NodeMemoryHigh
+            expr: (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) > 0.85
+            for: 10m
+            labels:
+              severity: warning
+            annotations:
+              description: "Node {{ $labels.instance }} memory usage is above 85%"
+          - alert: CertExpiringSoon
+            expr: certmanager_certificate_expiration_timestamp_seconds - time() < 14 * 24 * 3600
+            for: 1h
+            labels:
+              severity: warning
+            annotations:
+              description: "Certificate {{ $labels.name }} expires in less than 14 days"
+          - alert: PodNotReady
+            expr: kube_pod_status_ready{condition="true"} == 0 unless on(pod,namespace) kube_pod_status_phase{phase="Succeeded"}
+            for: 10m
+            labels:
+              severity: warning
+            annotations:
+              description: "Pod {{ $labels.namespace }}/{{ $labels.pod }} not ready for 10m"
+          - alert: NodeNotReady
+            expr: kube_node_status_condition{condition="Ready",status="true"} == 0
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              description: "Node {{ $labels.node }} is not ready"
+prometheusOperator:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
+kube-state-metrics:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+prometheus-node-exporter:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 32Mi
+    limits:
+      cpu: 200m
+      memory: 64Mi
+prometheus:
+  prometheusSpec:
+    retention: 7d
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: '1'
+        memory: 1Gi
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: 10Gi
+    ruleSelectorNilUsesHelmValues: false
+    serviceMonitorSelectorNilUsesHelmValues: false
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+kubeEtcd:
+  enabled: false

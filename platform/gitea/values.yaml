@@ -1,0 +1,60 @@
+gitea:
+  config:
+    server:
+      DOMAIN: gitea.example.com
+      ROOT_URL: https://gitea.example.com
+    webhook:
+      ALLOWED_HOST_LIST: private
+    actions:
+      ENABLED: true
+    oauth2:
+      ENABLE: true
+    openid:
+      ENABLE_OPENID_SIGNIN: true
+      ENABLE_OPENID_SIGNUP: true
+postgresql-ha:
+  enabled: false
+postgresql:
+  enabled: true
+  global:
+    postgresql:
+      auth:
+        existingSecret: gitea-postgresql-secret
+        database: gitea
+        username: gitea
+      service:
+        ports:
+          postgresql: 5432
+  primary:
+    persistence:
+      enabled: true
+      storageClass: do-block-storage
+      size: 10Gi
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 256Mi
+valkey-cluster:
+  enabled: false
+persistence:
+  enabled: true
+  create: false
+  mount: true
+  claimName: gitea-shared-storage
+service:
+  http:
+    type: ClusterIP
+  ssh:
+    type: ClusterIP
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: '1'
+    memory: 512Mi
+strategy:
+  type: Recreate

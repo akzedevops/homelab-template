@@ -1,0 +1,20 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: nextcloud
+  annotations:
+    external-dns.alpha.kubernetes.io/target: "<TUNNEL-UUID>.cfargotunnel.com"
+  namespace: nextcloud
+spec:
+  entryPoints: [websecure]
+  tls:
+
+  routes:
+    - match: Host(`nextcloud.example.com`)
+      kind: Rule
+      middlewares:
+        - name: crowdsec-bouncer
+          namespace: traefik
+      services:
+        - name: nextcloud
+          port: 8080

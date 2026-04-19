@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: traefik
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/manifest-generate-paths: platform/traefik
+spec:
+  project: default
+  sources:
+  - repoURL: https://traefik.github.io/charts
+    chart: traefik
+    targetRevision: '*'
+    helm:
+      valueFiles:
+      - $values/platform/traefik/values.yaml
+  - repoURL: https://gitea.example.com/admin/homelab.git
+    targetRevision: main
+    ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: traefik
+  syncPolicy:
+    retry:
+      limit: 3
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 2m
+    automated:
+      selfHeal: true
+      prune: true

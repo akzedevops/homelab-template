@@ -1,0 +1,20 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: jellyfin
+  annotations:
+    external-dns.alpha.kubernetes.io/target: "<TUNNEL-UUID>.cfargotunnel.com"
+  namespace: jellyfin
+spec:
+  entryPoints: [websecure]
+  tls:
+
+  routes:
+    - match: Host(`jellyfin.example.com`)
+      kind: Rule
+      middlewares:
+        - name: crowdsec-bouncer
+          namespace: traefik
+      services:
+        - name: jellyfin
+          port: 8096

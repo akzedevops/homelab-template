@@ -1,0 +1,27 @@
+provider:
+  name: cloudflare
+extraArgs:
+  - --cloudflare-dns-records-per-page=100
+  - --cloudflare-proxied
+env:
+  - name: CF_API_TOKEN
+    valueFrom:
+      secretKeyRef:
+        name: cloudflare-api-token
+        key: cf-api-token
+sources:
+  - traefik-proxy
+domainFilters:
+  - example.com
+policy: sync
+txtOwnerId: homelab
+txtPrefix: _externaldns.
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi
+serviceAccount:
+  create: true

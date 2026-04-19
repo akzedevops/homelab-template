@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: jellyfin
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/manifest-generate-paths: apps/jellyfin
+spec:
+  project: default
+  source:
+    repoURL: https://gitea.example.com/admin/homelab.git
+    path: apps/jellyfin
+    targetRevision: main
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: jellyfin
+  ignoreDifferences:
+  - group: ''
+    kind: PersistentVolumeClaim
+    jqPathExpressions:
+    - .spec
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+    syncOptions:
+    - RespectIgnoreDifferences=true
